@@ -4,13 +4,7 @@ A simple table renderer for numpy arrays. Provides a rich display hook for use w
 ## Installation
 `pip install git+https://github.com/agoose77/numpy-html.git#egg=numpy-html`
 
-### Use inside Jupyter
-Inside a notebook, execute
-```python
-import numpy_html; numpy_html.install_jupyter_hook()
-```
-
-#### Example
+## Example inside Jupyter
 ```python
 import numpy as np
 np.set_printoptions(threshold=5, edgeitems=2)
