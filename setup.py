@@ -8,6 +8,7 @@ setup(
     version="0.0.1",
     packages=["numpy_html"],
     url="https://github.com/agoose77/numpy-html",
+    install_requires=["numpy", "ipython"],
     license="MIT",
     author="Angus Hollands",
     author_email="goosey15@gmail.com",
