@@ -15,6 +15,7 @@ def ellipsis_renderer(ellipsis):
 
 def ellipsis_renderer_2D(index: int, array: np.ndindex, edge_items: int):
     n, m = array.shape
+    yield "<tr>"
     if m > 2 * edge_items:
         for i in range(edge_items):
             yield ELLIPSIS_STR_VERTICAL
@@ -26,6 +27,7 @@ def ellipsis_renderer_2D(index: int, array: np.ndindex, edge_items: int):
     else:
         for i in range(m):
             yield ELLIPSIS_STR_VERTICAL
+    yield "</tr>"
 
 
 def extend_index(head, value):
