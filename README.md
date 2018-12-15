@@ -3,6 +3,8 @@ A simple table renderer for numpy arrays. Provides a rich display hook for use w
 
 ## Example
 ```python
+import numpy as np
+np.set_printoptions(threshold=5, edgeitems=2)
 np.arange(49).reshape(7, 7)
 ```
 <table style='border-style:solid;border-width:1px;'>
