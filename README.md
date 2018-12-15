@@ -1,5 +1,5 @@
 # numpy-html
-A simple table renderer for numpy arrays. Provides a rich display hook for use with Jupyter Lab / Notebok.
+A simple table renderer for numpy arrays. Provides a rich display hook for use with Jupyter Lab / Notebook. Inspired by `xtensor`.
 
 ## Installation
 `pip install git+https://github.com/agoose77/numpy-html.git#egg=numpy-html`
