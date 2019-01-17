@@ -32,6 +32,7 @@ def fixed_format_element_npy(x, max_width=None):
     x_str = np.array2string(x)
     if max_width is None:
         return x_str
+    
     return f"{x_str:{max_width}}"
 
 
@@ -46,10 +47,10 @@ def fixed_format_items(items):
 
 
 def array_to_html(array, formatter=fixed_format_items, **formatter_kwargs):
-    # Get print options
     print_options = np.get_printoptions()
     edge_items = print_options["edgeitems"]
     threshold = print_options["threshold"]
+    
     if array.size < threshold:
         edge_items = 0
 
