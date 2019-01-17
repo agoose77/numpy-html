@@ -29,10 +29,12 @@ def format_items(items, format_element, **format_kwargs):
 
 
 def fixed_format_element_npy(x, max_width=None):
-    x_str = np.array2string(x)
+    # Use numpy to format element
+    x_str = np.array_str(x)
     if max_width is None:
         return x_str
     
+    # Return padded left-aligned string
     return f"{x_str:{max_width}}"
 
 
