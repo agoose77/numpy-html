@@ -30,7 +30,7 @@ def format_items(items, format_element, **format_kwargs):
 
 def fixed_format_element_npy(x, max_width=None):
     # Use numpy to format element
-    x_str = np.array_str(x)
+    x_str = np.array2string(x)
     if max_width is None:
         return x_str
     
