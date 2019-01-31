@@ -9,14 +9,6 @@ from .renderer import _render_table, ITEM_TYPE, INDEX_TYPE
 ITEMS_TYPE = typing.Iterable[ITEM_TYPE]
 
 
-@contextmanager
-def print_options_as(**opts):
-    old_options = np.get_printoptions()
-    np.set_printoptions(**opts)
-    yield
-    np.set_printoptions(**old_options)
-
-
 def format_index(index: INDEX_TYPE) -> typing.Union[INDEX_TYPE, int]:
     """Format the index tuple corresponding to a particular array element. Return the
 
@@ -69,7 +61,7 @@ def fixed_format_items(items: ITEMS_TYPE) -> typing.List[str]:
     :return: formatted string
     """
     items = list(items)
-    with print_options_as(floatmode="maxprec"):
+    with np.printoptions(floatmode="maxprec"):
         max_width = max(len(fixed_format_element_npy(e)) for (_, _, e) in (t for t in items if isinstance(t, tuple)))
         return [*format_items(items, fixed_format_element_npy, max_width=max_width)]
 
