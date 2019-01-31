@@ -14,5 +14,13 @@ setup(
     author="Angus Hollands",
     author_email="goosey15@gmail.com",
     description=" A simple table renderer for numpy arrays. Provides a rich display hook for use with Jupyter Lab / Notebok.",
-    long_description=long_description,
+    long_description=long_description,    
+    classifiers=[
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Framework :: Jupyter",
+        "Development Status :: 3 - Alpha",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
 )
