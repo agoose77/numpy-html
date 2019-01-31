@@ -13,7 +13,7 @@ setup(
     license="MIT",
     author="Angus Hollands",
     author_email="goosey15@gmail.com",
-    description=" A simple table renderer for numpy arrays. Provides a rich display hook for use with Jupyter Lab / Notebok.",
+    description=" A simple table renderer for numpy arrays. Provides a rich display hook for use with Jupyter Lab / Notebook.",
     long_description=long_description,    
     long_description_content_type="text/markdown",
     classifiers=[
