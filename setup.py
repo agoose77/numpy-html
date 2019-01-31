@@ -9,6 +9,7 @@ setup(
     packages=["numpy_html"],
     url="https://github.com/agoose77/numpy-html",
     install_requires=["numpy", "ipython"],
+    python_requires='>=3.6',
     license="MIT",
     author="Angus Hollands",
     author_email="goosey15@gmail.com",
