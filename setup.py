@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="numpy-html",
-    version="0.0.2",
+    version="0.0.3",
     packages=["numpy_html"],
     url="https://github.com/agoose77/numpy-html",
     install_requires=["numpy", "ipython"],

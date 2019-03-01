@@ -2,15 +2,28 @@ import typing
 
 import numpy as np
 
-ELLIPSIS_STR_HORIZONTAL = "<td><center>⋯</center></td>"
-ELLIPSIS_STR_VERTICAL = "<td><center>⋮</center></td>"
-ELLIPSIS_STR_DIAGONAL = "<td><center>⋱</center></td>"
 
-TEMPLATE_TYPE = typing.Tuple[str, typing.Tuple[int, ...], typing.Any]
-ITEM_TYPE = typing.Union[TEMPLATE_TYPE, str]
+def centered_table_cell(element: str) -> str:
+    return f"<td><center>{element}</center></td>"
+
+
+ELLIPSIS_CELL_HTML_HORIZONTAL = centered_table_cell("\u2026")
+ELLIPSIS_CELL_HTML_VERTICAL = centered_table_cell("\u22EE")
+ELLIPSIS_CELL_HTML_DIAGONAL = centered_table_cell("\u22F1")
+EMPTY_CELL_HTML = centered_table_cell("\u2800")
+
 INDEX_TYPE = typing.Tuple[int, ...]
+
+
+class TemplateItem(typing.NamedTuple):
+    template: str
+    index: INDEX_TYPE
+    item: typing.Any
+
+
+ITEM_TYPE = typing.Union[TemplateItem, str]
 ITEM_GENERATOR_TYPE = typing.Iterator[ITEM_TYPE]
-SUMMARY_RENDERER_TYPE = typing.Callable[[int, np.ndarray, int], typing.Iterator[str]]
+SUMMARY_RENDERER_TYPE = typing.Callable[[INDEX_TYPE, np.ndarray, int], typing.Iterator[str]]
 ITEM_RENDERER_TYPE = typing.Callable[[INDEX_TYPE, np.ndarray, int], ITEM_GENERATOR_TYPE]
 
 
@@ -32,15 +45,15 @@ def ellipsis_renderer_2D(index: INDEX_TYPE, array: np.ndarray, edge_items: int) 
     yield "<tr>"
     if m > 2 * edge_items:
         for i in range(edge_items):
-            yield ELLIPSIS_STR_VERTICAL
+            yield ELLIPSIS_CELL_HTML_VERTICAL
 
-        yield ELLIPSIS_STR_DIAGONAL
+        yield ELLIPSIS_CELL_HTML_DIAGONAL
 
         for i in range(edge_items):
-            yield ELLIPSIS_STR_VERTICAL
+            yield ELLIPSIS_CELL_HTML_VERTICAL
     else:
         for i in range(m):
-            yield ELLIPSIS_STR_VERTICAL
+            yield ELLIPSIS_CELL_HTML_VERTICAL
     yield "</tr>"
 
 
@@ -97,23 +110,23 @@ def _render_array_generic(
 
 
 def _render_row_1D(index: INDEX_TYPE, row, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    yield ("<tr><td style='font-family:monospace;white-space: pre;' title='{}'>{}</td></tr>", index, row)
+    yield TemplateItem("<tr><td style='font-family:monospace;white-space: pre;' title='{}'>{}</td></tr>", index, row)
 
 
 def _render_array_1D(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     return _render_array_generic(
-        _render_row_1D, make_constant_renderer(f"<tr>{ELLIPSIS_STR_VERTICAL}</tr>"), index, array, edge_items
+        _render_row_1D, make_constant_renderer(f"<tr>{ELLIPSIS_CELL_HTML_VERTICAL}</tr>"), index, array, edge_items
     )
 
 
 def _render_elem_2D(index: INDEX_TYPE, item, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    yield ("<td style='font-family:monospace;white-space: pre;' title='{}'>{}</td>", index, item)
+    yield TemplateItem("<td style='font-family:monospace;white-space: pre;' title='{}'>{}</td>", index, item)
 
 
 def _render_row_2D(index: INDEX_TYPE, row: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield "<tr>"
     yield from _render_array_generic(
-        _render_elem_2D, make_constant_renderer(ELLIPSIS_STR_HORIZONTAL), index, row, edge_items
+        _render_elem_2D, make_constant_renderer(ELLIPSIS_CELL_HTML_HORIZONTAL), index, row, edge_items
     )
     yield "</tr>"
 
@@ -130,13 +143,17 @@ def _render_row_ND(index: INDEX_TYPE, row: np.ndarray, edge_items: int) -> ITEM_
 
 def _render_array_ND(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield from _render_array_generic(
-        _render_row_ND, make_constant_renderer(ELLIPSIS_STR_VERTICAL), index, array, edge_items
+        _render_row_ND, make_constant_renderer(ELLIPSIS_CELL_HTML_VERTICAL), index, array, edge_items
     )
 
 
 def _render_array(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     if len(array.shape) == 1:
-        renderer = _render_array_1D
+        # Empty arrays should be explicitly rendered
+        if not array.shape[0]:
+            renderer = make_constant_renderer(EMPTY_CELL_HTML)
+        else:
+            renderer = _render_array_1D
     elif len(array.shape) == 2:
         renderer = _render_array_2D
     else:
