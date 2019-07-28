@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 import numpy as np
 
-from .renderer import _render_table, ITEM_TYPE, INDEX_TYPE
+from .renderer import render_table, ITEM_TYPE, INDEX_TYPE
 
 # Type of elements or templates
 ITEMS_TYPE = typing.Iterable[ITEM_TYPE]
@@ -91,5 +91,5 @@ def array_to_html(
     if array.size < threshold:
         edge_items = 0
 
-    items = _render_table((), array, edge_items)
+    items = render_table((), array, edge_items)
     return "\n".join(formatter(items, **formatter_kwargs))

@@ -10,7 +10,7 @@ TEMPLATE_TYPE = typing.Tuple[str, typing.Tuple[int, ...], typing.Any]
 ITEM_TYPE = typing.Union[TEMPLATE_TYPE, str]
 INDEX_TYPE = typing.Tuple[int, ...]
 ITEM_GENERATOR_TYPE = typing.Iterator[ITEM_TYPE]
-SUMMARY_RENDERER_TYPE = typing.Callable[[int, np.ndarray, int], typing.Iterator[str]]
+SUMMARY_RENDERER_TYPE = typing.Callable[[INDEX_TYPE, np.ndarray, int], typing.Iterator[str]]
 ITEM_RENDERER_TYPE = typing.Callable[[INDEX_TYPE, np.ndarray, int], ITEM_GENERATOR_TYPE]
 
 
@@ -27,7 +27,7 @@ def make_constant_renderer(const: str) -> SUMMARY_RENDERER_TYPE:
     return wrapper
 
 
-def ellipsis_renderer_2D(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> typing.Iterator[str]:
+def ellipsis_renderer_2d(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> typing.Iterator[str]:
     n, m = array.shape
     yield "<tr>"
     if m > 2 * edge_items:
@@ -48,7 +48,7 @@ def extend_index(index: INDEX_TYPE, coordinate: int) -> INDEX_TYPE:
     return (*index, coordinate)
 
 
-def render_array_summarized(
+def render_array_items_summarized(
     item_renderer: ITEM_RENDERER_TYPE,
     summary_renderer: ITEM_RENDERER_TYPE,
     index: INDEX_TYPE,
@@ -73,7 +73,7 @@ def render_array_summarized(
         yield from item_renderer(extend_index(index, i), item, edge_items)
 
 
-def _render_array_generic(
+def render_array_items(
     item_renderer: ITEM_RENDERER_TYPE,
     summary_renderer: ITEM_RENDERER_TYPE,
     index: INDEX_TYPE,
@@ -90,61 +90,67 @@ def _render_array_generic(
     :return:
     """
     if edge_items and len(array) > 2 * edge_items:
-        yield from render_array_summarized(item_renderer, summary_renderer, index, array, edge_items)
+        yield from render_array_items_summarized(item_renderer, summary_renderer, index, array, edge_items)
     else:
         for i, item in enumerate(array):
             yield from item_renderer(extend_index(index, i), item, edge_items)
 
 
-def _render_row_1D(index: INDEX_TYPE, row, edge_items: int) -> ITEM_GENERATOR_TYPE:
+def render_array_0d(index: INDEX_TYPE, item, edge_items: int) -> ITEM_GENERATOR_TYPE:
+    yield ("<tr><td style='font-family:monospace;white-space: pre;' title='{}'>{}</td></tr>", index, item)
+
+
+def render_row_1d(index: INDEX_TYPE, row, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield ("<tr><td style='font-family:monospace;white-space: pre;' title='{}'>{}</td></tr>", index, row)
 
 
-def _render_array_1D(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    return _render_array_generic(
-        _render_row_1D, make_constant_renderer(f"<tr>{ELLIPSIS_STR_VERTICAL}</tr>"), index, array, edge_items
+def render_array_1d(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
+    return render_array_items(
+        render_row_1d, make_constant_renderer(f"<tr>{ELLIPSIS_STR_VERTICAL}</tr>"), index, array, edge_items
     )
 
 
-def _render_elem_2D(index: INDEX_TYPE, item, edge_items: int) -> ITEM_GENERATOR_TYPE:
+def render_elem_2d(index: INDEX_TYPE, item, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield ("<td style='font-family:monospace;white-space: pre;' title='{}'>{}</td>", index, item)
 
 
-def _render_row_2D(index: INDEX_TYPE, row: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
+def render_row_2d(index: INDEX_TYPE, row: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield "<tr>"
-    yield from _render_array_generic(
-        _render_elem_2D, make_constant_renderer(ELLIPSIS_STR_HORIZONTAL), index, row, edge_items
+    yield from render_array_items(
+        render_elem_2d, make_constant_renderer(ELLIPSIS_STR_HORIZONTAL), index, row, edge_items
     )
     yield "</tr>"
 
 
-def _render_array_2D(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    yield from _render_array_generic(_render_row_2D, ellipsis_renderer_2D, index, array, edge_items)
+def render_array_2d(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
+    yield from render_array_items(render_row_2d, ellipsis_renderer_2d, index, array, edge_items)
 
 
-def _render_row_ND(index: INDEX_TYPE, row: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
+def render_row_nd(index: INDEX_TYPE, row: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield "<tr><td>"
-    yield from _render_table(index, row, edge_items)
+    yield from render_table(index, row, edge_items)
     yield "</td></tr>"
 
 
-def _render_array_ND(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    yield from _render_array_generic(
-        _render_row_ND, make_constant_renderer(ELLIPSIS_STR_VERTICAL), index, array, edge_items
+def render_array_nd(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
+    yield from render_array_items(
+        render_row_nd, make_constant_renderer(ELLIPSIS_STR_VERTICAL), index, array, edge_items
     )
 
 
-def _render_array(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    if len(array.shape) == 1:
-        renderer = _render_array_1D
-    elif len(array.shape) == 2:
-        renderer = _render_array_2D
-    else:
-        renderer = _render_array_ND
+_shape_length_to_renderer = {
+    0: render_array_0d,
+    1: render_array_1d,
+    2: render_array_2d
+}
+
+
+def render_array(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
+    renderer = _shape_length_to_renderer.get(len(array.shape), render_array_nd)
     return renderer(index, array, edge_items)
 
 
-def _render_table(index: INDEX_TYPE, array, edge_items: int) -> ITEM_GENERATOR_TYPE:
+def render_table(index: INDEX_TYPE, array, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield "<table style='border-style:solid;border-width:1px;'>"
-    yield from _render_array(index, array, edge_items)
+    yield from render_array(index, array, edge_items)
     yield "</table>"
