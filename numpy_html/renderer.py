@@ -2,13 +2,26 @@ import typing
 
 import numpy as np
 
-ELLIPSIS_STR_HORIZONTAL = "<td><center>⋯</center></td>"
-ELLIPSIS_STR_VERTICAL = "<td><center>⋮</center></td>"
-ELLIPSIS_STR_DIAGONAL = "<td><center>⋱</center></td>"
 
-TEMPLATE_TYPE = typing.Tuple[str, typing.Tuple[int, ...], typing.Any]
-ITEM_TYPE = typing.Union[TEMPLATE_TYPE, str]
+def centered_table_cell(element: str) -> str:
+    return f"<td><center>{element}</center></td>"
+
+
+ELLIPSIS_CELL_HTML_HORIZONTAL = centered_table_cell("\u2026")
+ELLIPSIS_CELL_HTML_VERTICAL = centered_table_cell("\u22EE")
+ELLIPSIS_CELL_HTML_DIAGONAL = centered_table_cell("\u22F1")
+EMPTY_CELL_HTML = centered_table_cell("\u2800")
+
 INDEX_TYPE = typing.Tuple[int, ...]
+
+
+class TemplateItem(typing.NamedTuple):
+    template: str
+    index: INDEX_TYPE
+    item: typing.Any
+
+
+ITEM_TYPE = typing.Union[TemplateItem, str]
 ITEM_GENERATOR_TYPE = typing.Iterator[ITEM_TYPE]
 SUMMARY_RENDERER_TYPE = typing.Callable[[INDEX_TYPE, np.ndarray, int], typing.Iterator[str]]
 ITEM_RENDERER_TYPE = typing.Callable[[INDEX_TYPE, np.ndarray, int], ITEM_GENERATOR_TYPE]
@@ -32,15 +45,15 @@ def ellipsis_renderer_2d(index: INDEX_TYPE, array: np.ndarray, edge_items: int) 
     yield "<tr>"
     if m > 2 * edge_items:
         for i in range(edge_items):
-            yield ELLIPSIS_STR_VERTICAL
+            yield ELLIPSIS_CELL_HTML_VERTICAL
 
-        yield ELLIPSIS_STR_DIAGONAL
+        yield ELLIPSIS_CELL_HTML_DIAGONAL
 
         for i in range(edge_items):
-            yield ELLIPSIS_STR_VERTICAL
+            yield ELLIPSIS_CELL_HTML_VERTICAL
     else:
         for i in range(m):
-            yield ELLIPSIS_STR_VERTICAL
+            yield ELLIPSIS_CELL_HTML_VERTICAL
     yield "</tr>"
 
 
@@ -97,27 +110,27 @@ def render_array_items(
 
 
 def render_array_0d(index: INDEX_TYPE, item, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    yield ("<tr><td style='font-family:monospace;white-space: pre;' title='{}'>{}</td></tr>", index, item)
+    yield TemplateItem("<tr><td style='font-family:monospace;white-space: pre;' title='{}'>{}</td></tr>", index, item)
 
 
 def render_row_1d(index: INDEX_TYPE, row, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    yield ("<tr><td style='font-family:monospace;white-space: pre;' title='{}'>{}</td></tr>", index, row)
+    yield TemplateItem("<tr><td style='font-family:monospace;white-space: pre;' title='{}'>{}</td></tr>", index, row)
 
 
 def render_array_1d(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     return render_array_items(
-        render_row_1d, make_constant_renderer(f"<tr>{ELLIPSIS_STR_VERTICAL}</tr>"), index, array, edge_items
+        render_row_1d, make_constant_renderer(f"<tr>{ELLIPSIS_CELL_HTML_VERTICAL}</tr>"), index, array, edge_items
     )
 
 
 def render_elem_2d(index: INDEX_TYPE, item, edge_items: int) -> ITEM_GENERATOR_TYPE:
-    yield ("<td style='font-family:monospace;white-space: pre;' title='{}'>{}</td>", index, item)
+    yield TemplateItem("<td style='font-family:monospace;white-space: pre;' title='{}'>{}</td>", index, item)
 
 
 def render_row_2d(index: INDEX_TYPE, row: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield "<tr>"
     yield from render_array_items(
-        render_elem_2d, make_constant_renderer(ELLIPSIS_STR_HORIZONTAL), index, row, edge_items
+        render_elem_2d, make_constant_renderer(ELLIPSIS_CELL_HTML_HORIZONTAL), index, row, edge_items
     )
     yield "</tr>"
 
@@ -134,7 +147,7 @@ def render_row_nd(index: INDEX_TYPE, row: np.ndarray, edge_items: int) -> ITEM_G
 
 def render_array_nd(index: INDEX_TYPE, array: np.ndarray, edge_items: int) -> ITEM_GENERATOR_TYPE:
     yield from render_array_items(
-        render_row_nd, make_constant_renderer(ELLIPSIS_STR_VERTICAL), index, array, edge_items
+        render_row_nd, make_constant_renderer(ELLIPSIS_CELL_HTML_VERTICAL), index, array, edge_items
     )
 
 

@@ -3,18 +3,10 @@ from contextlib import contextmanager
 
 import numpy as np
 
-from .renderer import render_table, ITEM_TYPE, INDEX_TYPE
+from .renderer import render_table, ITEM_TYPE, INDEX_TYPE, TemplateItem
 
 # Type of elements or templates
 ITEMS_TYPE = typing.Iterable[ITEM_TYPE]
-
-
-@contextmanager
-def print_options_as(**opts):
-    old_options = np.get_printoptions()
-    np.set_printoptions(**opts)
-    yield
-    np.set_printoptions(**old_options)
 
 
 def format_index(index: INDEX_TYPE) -> typing.Union[INDEX_TYPE, int]:
@@ -69,8 +61,13 @@ def fixed_format_items(items: ITEMS_TYPE) -> typing.List[str]:
     :return: formatted string
     """
     items = list(items)
-    with print_options_as(floatmode="maxprec"):
-        max_width = max(len(fixed_format_element_npy(e)) for (_, _, e) in (t for t in items if isinstance(t, tuple)))
+
+    with np.printoptions(floatmode="maxprec"):
+        template_lengths = [len(fixed_format_element_npy(t.item)) for t in items if isinstance(t, TemplateItem)]
+        try:
+            max_width = max(template_lengths)
+        except ValueError:
+            max_width = None
         return [*format_items(items, fixed_format_element_npy, max_width=max_width)]
 
 
