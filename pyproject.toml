@@ -1,0 +1,14 @@
+[tool]
+[tool.poetry]
+name = "numpy-html"
+version = "0.0.5"
+description = "A simple table renderer for numpy arrays. Provides a rich display hook for use with Jupyter Lab / Notebook."
+license = "MIT"
+classifiers = ["Programming Language :: Python :: 3.6", "Programming Language :: Python :: 3.7", "Framework :: Jupyter", "Development Status :: 3 - Alpha", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent"]
+authors = ["Angus Hollands <goosey15@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.6"
+ipython = "*"
+numpy = "*"
