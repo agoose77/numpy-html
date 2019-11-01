@@ -13,8 +13,9 @@ def install_jupyter_hook(cls=np.ndarray):
 
 
 try:
-    ipython = get_ipython()
-except NameError:
+    from IPython import get_ipython
+except ImportError:
     pass
 else:
-    install_jupyter_hook()
+    if get_ipython() is not None:
+        install_jupyter_hook()
