@@ -3,7 +3,7 @@ import typing
 import numpy as np
 
 
-TD_ITEM_HTML_TEMPLATE = '<td style="font-family:monospace;white-space: pre;" align="center" title="{}">{}</td>'
+TD_ITEM_HTML_TEMPLATE = '<td style="font-family:monospace;white-space: pre;" title="{}"><center>{}</center></td>'
 
 ELLIPSIS_CELL_HTML_HORIZONTAL = TD_ITEM_HTML_TEMPLATE.format("element(s) elided", "\u2026")
 ELLIPSIS_CELL_HTML_VERTICAL = TD_ITEM_HTML_TEMPLATE.format("element(s) elided", "\u22EE")
