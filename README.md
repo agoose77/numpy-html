@@ -1,4 +1,9 @@
 # numpy-html
+[![pypi-badge][]][pypi] 
+
+[pypi-badge]: https://img.shields.io/pypi/v/numpy-html
+[pypi]: https://pypi.org/project/numpy-html
+
 A simple table renderer for numpy arrays. Provides a rich display hook for use with Jupyter Lab / Notebook. Inspired by [xtensor](https://github.com/QuantStack/xtensor).
 
 ## Installation
