@@ -1,22 +1,20 @@
-from .formatter import array_to_html
 import numpy as np
+from .formatter import array_to_html
 
 
-def install_jupyter_hook(cls=np.ndarray):
-    """Install Jupyter display hook for a given array class
-
-    :param cls: numpy-like array which is compatible with np.printoptions and np.array2string
-    :return:
-    """
-    from IPython import get_ipython
-    ipython = get_ipython()
-    if ipython is None:
-        raise RuntimeError("Must be running inside IPython environment")
+def register_formatter(ipython, cls):
     html_formatter = ipython.display_formatter.formatters["text/html"]
-    return html_formatter.for_type(cls, array_to_html)
+    html_formatter.for_type(cls, array_to_html)
 
 
-try:
-    install_jupyter_hook()
-except (ImportError, RuntimeError):
-    pass
+def unregister_formatter(ipython, cls):
+    html_formatter = ipython.display_formatter.formatters["text/html"]
+    html_formatter.pop(cls)
+            
+
+def load_ipython_extension(ipython):
+    register_formatter(ipython, np.ndarray)
+    
+
+def unload_ipython_extension(ipython):
+    unregister_formatter(ipython, np.ndarray)
