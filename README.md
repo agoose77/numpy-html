@@ -11,7 +11,7 @@ A simple table renderer for numpy arrays. Provides a rich display hook for use w
 
 ## Example inside Jupyter
 ```python
-import numpy_html
+%load_ext numpy_html
 import numpy as np
 
 np.set_printoptions(threshold=5, edgeitems=2)
